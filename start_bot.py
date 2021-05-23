@@ -1,4 +1,9 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+)
 import logging
 from dotenv import load_dotenv
 import os
@@ -7,8 +12,12 @@ import commands
 
 
 def unknown(update, context):
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Desculpe, eu não entendi esse comando.")
+    update.message.reply_text("Desculpe, eu não entendi esse comando.")
+
+
+def error(update, context):
+    print(f"Update {update} caused error {context.error}")
+    update.message.reply_text("Desculpe, ocorreu um erro, procure o Danilo!")
 
 
 def main() -> None:
@@ -24,8 +33,6 @@ def main() -> None:
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                         level=logging.INFO)
 
-    logger = logging.getLogger(__name__)
-
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
@@ -36,6 +43,9 @@ def main() -> None:
 
     # add message handler
     dispatcher.add_handler(MessageHandler(Filters.command, unknown))
+
+    # add handler error
+    dispatcher.add_error_handler(error)
 
     # Start the Bot
     updater.start_polling()
