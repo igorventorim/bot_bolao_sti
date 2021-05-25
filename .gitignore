@@ -2,3 +2,5 @@ venv/
 __pycache__/
 .env
 teste.py
+credentials.json
+token.json

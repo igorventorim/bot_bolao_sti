@@ -1,8 +1,8 @@
 # INSTALL REQUIREMENTS
-- python 3.6
-- virtualenv --python=python3.6
+- python 3.9
+- virtualenv --python=python3.9
 - source venv/bin/activate
-- pip3 install -r requirements.txt
+- pip install -r requirements.txt
 
 # CONFIG
 - Create file .env based in file .env.example
