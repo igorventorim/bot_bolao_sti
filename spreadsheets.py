@@ -17,8 +17,9 @@ class Spreadsheets:
         self.service = None
         self.pd = None
         load_dotenv()
+        self.__create_service()
 
-    def create_service(self):
+    def __create_service(self):
 
         CREDENTIALS_FILE = 'credentials.json'
         TOKEN_FILE = 'token.json'
@@ -51,7 +52,6 @@ class Spreadsheets:
             print(e)
 
     def create_spreadsheet_with_title(self, title='Planilha sem título'):
-        self.create_service()
         spreadsheet_body = {'properties': {'title': title, 'locale': 'pt_BR'}}
 
         request = self.service.spreadsheets().create(body=spreadsheet_body)
@@ -62,7 +62,49 @@ class Spreadsheets:
         else:
             print("Erro ao criar planilha")
 
-    def export_data_to_sheets(self):
+    def add_sheet_with_name(self, tab_name):
+        batch_update_spreadsheet_request_body = {
+            "requests": [
+                {
+                    "addSheet": {
+                        "properties": {
+                            "title": tab_name,
+                            "gridProperties": {
+                                "rowCount": 20,
+                                "columnCount": 12
+                            },
+                            "tabColor": {
+                                "red": 1.0,
+                                "green": 1.0,
+                                "blue": 1.0
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+
+        request = self.service.spreadsheets().batchUpdate(
+            spreadsheetId=self.id_spreadsheet, body=batch_update_spreadsheet_request_body)
+        response = request.execute()
+
+        if response['spreadsheetId'] is not None:
+            self.id_spreadsheet = response['spreadsheetId']
+        else:
+            print("Erro ao adicionar nova tab")
+
+    def get_metadata_spreadsheet(self):
+        request = self.service.spreadsheets().get(spreadsheetId=self.id_spreadsheet)
+        response = request.execute()
+        # TODO CATCH ERROR
+        return response
+
+    def get_sheets_properties(self):
+        metadata_spreadsheet = self.get_metadata_spreadsheet()
+        # TODO CATCH ERROR
+        return metadata_spreadsheet['sheets']
+
+    def export_data_to_sheets(self, range=None):
         if self.service is None:
             print("Service not found!")
             return
@@ -74,7 +116,7 @@ class Spreadsheets:
         response_date = self.service.spreadsheets().values().update(
             spreadsheetId=self.id_spreadsheet,
             valueInputOption='RAW',
-            range=self.range,
+            range=range if range is not None else self.range,
             body=dict(
                 majorDimension='ROWS',
                 values=self.df.T.reset_index().T.values.tolist()
@@ -82,14 +124,14 @@ class Spreadsheets:
         ).execute()
         print('Sheet successfully Updated')
 
-    def read_sheets(self):
+    def read_sheets(self, range=None):
         if self.service is None:
             print("Service not found!")
             return
 
         sheet = self.service.spreadsheets()
         result_input = sheet.values().get(spreadsheetId=self.id_spreadsheet,
-                                          range=self.range).execute()
+                                          range=range if range is not None else self.range).execute()
         values_input = result_input.get('values', [])
 
         if not values_input:
@@ -100,13 +142,12 @@ class Spreadsheets:
 
 
 if __name__ == "__main__":
-    # spread_sheats.create_service('credentials.json', 'sheets', 'v4')
-    # spread_sheats.read_sheets()
-    # spread_sheats.df["available"][0] = 1
-    # print(spread_sheats.df.head())
-    # spread_sheats.export_data_to_sheets()
-
-    planilha = Spreadsheets()
-    planilha.create_spreadsheet_with_title(
-        'Planilha teste Igor')
-    planilha.read_sheets()
+    planilha = Spreadsheets(
+        id_spreadsheet='1KCZnyqQUF6MoBIz89p0XWVS2wVI7tQV72K-kjQLs_hQ')
+    # planilha.create_spreadsheet_with_title(
+    # 'Planilha teste Igor')
+    planilha.add_sheet_with_name('rodada3')
+    planilha.get_metadata_spreadsheet()
+    print("Número de tabs na planilha: {}".format(
+        len(planilha.get_sheets_properties())))
+    # planilha.read_sheets()
