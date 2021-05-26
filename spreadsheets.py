@@ -104,6 +104,32 @@ class Spreadsheets:
         # TODO CATCH ERROR
         return metadata_spreadsheet['sheets']
 
+    def delete_sheet_by_sheet_id(self, id):
+        batch_update_spreadsheet_request_body = {
+            "requests": [
+                {
+                    "deleteSheet": {
+                        "sheetId": id
+                    }
+                }
+            ]
+        }
+        request = self.service.spreadsheets().batchUpdate(
+            spreadsheetId=self.id_spreadsheet, body=batch_update_spreadsheet_request_body)
+        response = request.execute()
+
+    def delete_sheet_by_sheet_name(self, name):
+        sheets_properties = self.get_sheets_properties()
+        id = None
+        for sheet in sheets_properties:
+            if sheet['properties']['title'] == name:
+                id = sheet['properties']['sheetId']
+
+        if id is not None:
+            self.delete_sheet_by_sheet_id(id)
+        else:
+            print('Sheet not found!')
+
     def export_data_to_sheets(self, range=None):
         if self.service is None:
             print("Service not found!")
