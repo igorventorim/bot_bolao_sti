@@ -1,5 +1,9 @@
 # Name of function is the command used in telegram. i.e. /start
 # Create in this file just command functions
+
+from google_service import GoogleApiService
+
+
 def start(update, context):
     update.message.reply_text(
         "Eu sou um robô, por favor, converse comigo!\nDigite /ajuda para listar os comandos disponíveis.")
@@ -62,3 +66,14 @@ def palpites(update, context):
 
 def ranking(update, context):
     pass
+
+
+def configurar_bolao(update, context):
+    google_api_service = GoogleApiService()
+    result_criar_planilha = google_api_service.criar_planilha(
+        'bolao_' + str(update.message.chat.id))
+
+    update.message.reply_text(
+        "Seu bolão foi criado! Confira a planilha a seguir: " +
+        result_criar_planilha['spreadsheetUrl']
+    )
