@@ -52,7 +52,9 @@ def rodada_bolao(update, context):
         )
 
 
-def meu_palpite(update, context):
+def palpite(update, context):
+    import ipdb
+    ipdb.set_trace()
     pass
 
 
@@ -61,4 +63,23 @@ def palpites(update, context):
 
 
 def ranking(update, context):
+    pass
+
+
+def participar(update, context):
+
+    if update.message.chat.type in ['group', 'supergroup']:
+        update.message.id
+
+        update.message.reply_text(
+            '{} inscrito com sucesso.'.format(update.message.full_name))
+    else:
+        update.message.reply_text(
+            'Só é possível se inscrever em um bolão a partir de um grupo.')
+
+
+def iniciar(update, context):
+    # VERIFICAR SE É ADMINISTRADOR
+    # VINCULAR GRUPO COM CHAT_ID e TITLE NA TABELA DE GERENCIAMENTO
+    # CRIAR TABELA DO BOLÃO COM TABS:[PARTICIPANTES,RANKING,RODADA_1] E VINCULAR SPREADSHEET_ID NA TABELA DE GERENCIAMENTO
     pass

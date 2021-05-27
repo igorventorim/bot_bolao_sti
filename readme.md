@@ -6,6 +6,7 @@
 
 # CONFIG
 - Create file .env based in file .env.example
+- Add google credentials file in root path with filename credentials.json
 
 # RUN
 - python3 start_bot.py
