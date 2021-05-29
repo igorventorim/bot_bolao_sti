@@ -139,13 +139,9 @@ class SpreadsheetsService:
         else:
             print('Sheet not found!')
 
-    def export_data_to_sheets(self, range=None):
+    def export_data_to_sheets(self,df,range=None):
         if self.service is None:
             print("Service not found!")
-            return
-
-        if self.df is None:
-            print("Dataframe not found!")
             return
 
         response_date = self.service.spreadsheets().values().update(
@@ -154,7 +150,7 @@ class SpreadsheetsService:
             range=range if range is not None else self.range,
             body=dict(
                 majorDimension='ROWS',
-                values=self.df.T.reset_index().T.values.tolist()
+                values=df.T.reset_index().T.values.tolist()
             )
         ).execute()
         print('Sheet successfully Updated')
@@ -171,9 +167,9 @@ class SpreadsheetsService:
 
         if not values_input:
             print('No data found.')
-            self.df = None
+            return pd.DataFrame()
         else:
-            self.df = pd.DataFrame(values_input[1:], columns=values_input[0])
+           return pd.DataFrame(values_input[1:], columns=values_input[0])
 
 
 if __name__ == "__main__":

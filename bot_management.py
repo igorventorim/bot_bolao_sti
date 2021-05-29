@@ -25,11 +25,18 @@ class BotManagement:
     def verificar_existencia_bolao_por_chat_id(self, chat_id):
 
         boloes_cadastrados_dict = self.__get_dict_boloes_cadastrados_por_chatid()
-
         if chat_id in boloes_cadastrados_dict:
             return True
         else:
             return False
+
+    def get_info_bolao(self, chat_id):
+        boloes_cadastrados_dict = self.__get_dict_boloes_cadastrados_por_chatid()
+        if chat_id in boloes_cadastrados_dict:
+            return boloes_cadastrados_dict[chat_id]
+        else:
+            raise Exception('Info bolão não encontrada!')
+
 
     def __get_dict_boloes_cadastrados_por_chatid(self):
         with open(BotManagement.BOT_MANAGEMENT_FILENAME, 'r') as file_config:
@@ -38,6 +45,6 @@ class BotManagement:
             boloes_info_list = [ x.rstrip('\n').split(';') for x in linhas][1:]
             
             for bolao_info in boloes_info_list:
-                boloes_cadastrados_dict[bolao_info[0]] = bolao_info
+                boloes_cadastrados_dict[int(bolao_info[0])] = bolao_info
 
             return boloes_cadastrados_dict

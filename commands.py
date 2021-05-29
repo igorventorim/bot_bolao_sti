@@ -3,6 +3,7 @@
 
 from spreadsheets_service import SpreadsheetsService
 from bot_management import BotManagement
+import pandas as pd
 import ipdb
 
 
@@ -73,18 +74,28 @@ def ranking(update, context):
 def participar(update, context):
 
     if update.message.chat.type in ['group', 'supergroup']:
-        spreadsheets_service = SpreadsheetsService()
 
+        bot_management = BotManagement()
         if not bot_management.verificar_existencia_bolao_por_chat_id(update.message.chat.id):
-            spreadsheets_metadata = spreadsheets_service.get_metadata_spreadsheet()
-            update.message.reply_text('Esse grupo ainda não possui nenhum bolão ativo, peça para algum administrador do grupo iniciar o bolão')
+            update.message.reply_text('Esse grupo ainda não possui nenhum bolão ativo, peça para algum administrador do grupo iniciar o bolão.')
             return
+
+        info_bolao = bot_management.get_info_bolao(update.message.chat.id)
+        spreadsheets_service = SpreadsheetsService(id_spreadsheet=info_bolao[2],range='PARTICIPANTES!A1:AA100000')
+        df = spreadsheets_service.read_sheets()
+
+        novo = {'TELEGRAM_CHAT_ID': str(update.message.from_user.id), 'NOME': update.message.from_user.full_name}
         
-        #TODO VERIFICAR SE PARTICIPANTE JÁ NÃO SE ENCONTRA INSCRITO
-        #TODO INSCREVER PARTICIPANTE
+        if not df[df['TELEGRAM_CHAT_ID'] == str(update.message.from_user.id)].empty:
+            update.message.reply_text('Não foi possível realizar o cadastro por você já está cadastrado.')
+            return
+        else:
+            df = df.append(novo, ignore_index=True)
+            spreadsheets_service.export_data_to_sheets(df)
 
         update.message.reply_text(
-            '{} inscrito com sucesso.'.format(update.message.full_name))
+            '{} inscrito com sucesso!'.format(update.message.from_user.full_name))
+
     else:
         update.message.reply_text(
             'Só é possível se inscrever em um bolão a partir de um grupo.')
@@ -113,6 +124,10 @@ def iniciar(update, context):
         'bolao_' + str(update.message.chat.title))
 
     spreadsheets_service.add_sheet_with_name('PARTICIPANTES')
+    data = { 'TELEGRAM_CHAT_ID': [update.message.from_user.id], 'NOME': [update.message.from_user.full_name]}
+    df = pd.DataFrame(data,columns=['TELEGRAM_CHAT_ID','NOME'])
+    spreadsheets_service.export_data_to_sheets(df,'PARTICIPANTES!A1:AA100000')
+    
     spreadsheets_service.add_sheet_with_name('RANKING')
     spreadsheets_service.add_sheet_with_name('RODADA_1')
     spreadsheets_service.delete_first_tab()
