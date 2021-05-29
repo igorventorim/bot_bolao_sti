@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import os
 from inspect import getmembers, isfunction
 import commands
+from bot_management import BotManagement
 
 
 def unknown(update, context):
@@ -26,6 +27,8 @@ def main() -> None:
 
     # Load environments variables
     load_dotenv()
+
+    BotManagement.set_config()
 
     # Create the Updater and pass it your bot's token.
     updater = Updater(
