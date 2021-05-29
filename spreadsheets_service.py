@@ -6,11 +6,12 @@ import os
 import pickle
 import pandas as pd
 from dotenv import load_dotenv
+from bot_management import BotManagement
 
 
-class Spreadsheets:
+class SpreadsheetsService:
 
-    def __init__(self, scopes=['https://www.googleapis.com/auth/spreadsheets'], id_spreadsheet=None, range='Página1!A1:AA100000'):
+    def __init__(self, scopes=['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/spreadsheets'], id_spreadsheet=None, range='Página1!A1:AA100000'):
         self.scopes = scopes
         self.id_spreadsheet = id_spreadsheet
         self.range = range
@@ -18,6 +19,9 @@ class Spreadsheets:
         self.pd = None
         load_dotenv()
         self.__create_service()
+
+    def get_service(self):
+        return self.service
 
     def __create_service(self):
 
@@ -62,6 +66,8 @@ class Spreadsheets:
         else:
             print("Erro ao criar planilha")
 
+        return response
+
     def add_sheet_with_name(self, tab_name):
         batch_update_spreadsheet_request_body = {
             "requests": [
@@ -103,6 +109,9 @@ class Spreadsheets:
         metadata_spreadsheet = self.get_metadata_spreadsheet()
         # TODO CATCH ERROR
         return metadata_spreadsheet['sheets']
+
+    def delete_first_tab(self):
+        self.delete_sheet_by_sheet_id(0)
 
     def delete_sheet_by_sheet_id(self, id):
         batch_update_spreadsheet_request_body = {
